@@ -16,7 +16,6 @@
 
 <p>&nbsp;<img align="center" src="https://github-readme-stats.vercel.app/api?username=mt-yk&show_icons=true&locale=en" alt="mt-yk" /></p>
 
-<p><img align="center" src="https://github-readme-streak-stats.herokuapp.com/?user=mt-yk&" alt="mt-yk" /></p>
 
 
 コードが読みずらいですが大目に見てください
