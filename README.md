@@ -5,14 +5,24 @@
 
 - 🌱 I’m currently learning **tkinter**
 
+
 # 説明
 tkinterで作ったメディアプレイヤーです
+## 注意
+[セットアップファイル](https://github.com/MT-YK/pyplayer/releases/download/1.0/pyplayer_setup.exe)はwindows defenderに誤検出されます
+セットアップファイルは安全です
+
+Virus totalの結果↓
+![Virustotalの結果](https://github.com/MT-YK/pyplayer/raw/main/virustotal.png)
 
 ## 開発者向け
  1. `git clone https://github.com/MT-YK/pyplayer.git`
  2. `pip install -r requirements.txt`
  3. `python main.py`
-
+## ビルド
+ 1. `git clone https://github.com/MT-YK/pyplayer.git`
+ 2. `pip install -r requirements.txt`
+ 3. `python build.py`
 <p align="left">
 </p>
 
