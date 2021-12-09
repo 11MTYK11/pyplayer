@@ -60,6 +60,15 @@ import json,uuid
 import zlib,queue
 import urllib.request
 
+youtube_dlurl = "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe"
+save_path = os.path.join(os.path.dirname(sys.argv[0]),"bin\\yt-dlp.exe")
+if os.path.exists(save_path):
+    pass
+else:
+    data = urllib.request.urlopen(youtube_dlurl).read()
+    with open(save_path, mode="wb") as file:
+        file.write(data)
+
 #audio のクラス
 class Audio():
     def __init__(self):
@@ -1060,14 +1069,7 @@ class dataDialog(simpledialog.Dialog):
         box.pack()
 
 script_dir = os.path.dirname(sys.argv[0])
-youtube_dlurl = "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe"
-save_path = os.path.join(os.path.dirname(sys.argv[0]),"bin\\yt-dlp.exe")
-if os.path.exists(save_path):
-    pass
-else:
-    data = urllib.request.urlopen(youtube_dlurl).read()
-    with open(save_path, mode="wb") as file:
-        file.write(data)
+
 try:
     os.mkdir(os.path.join(os.path.dirname(sys.argv[0]),"tempfile"))
 except:
