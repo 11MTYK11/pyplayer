@@ -5,6 +5,14 @@
 
 - 🌱 I’m currently learning **tkinter**
 
+# 説明
+tkinterで作ったメディアプレイヤーです
+
+## 開発者向け
+ 1. `git clone https://github.com/MT-YK/pyplayer.git`
+ 2. `pip install -r requirements.txt`
+ 3. `python main.py`
+
 <p align="left">
 </p>
 
@@ -15,16 +23,3 @@
 <p><img align="left" src="https://github-readme-stats.vercel.app/api/top-langs?username=mt-yk&show_icons=true&locale=en&layout=compact" alt="mt-yk" /></p>
 
 <p>&nbsp;<img align="center" src="https://github-readme-stats.vercel.app/api?username=mt-yk&show_icons=true&locale=en" alt="mt-yk" /></p>
-
-
-コードが読みずらいですが大目に見てください
-
-
-使用する前に。
-python tkinterdnd_installer.py
-を。実行してください
-
-
-ビルド
-python setup.py
-を実行してください
