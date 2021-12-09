@@ -57,7 +57,8 @@ import ffmpeg
 import youtube_dl
 import numpy as np
 import json,uuid
-import zlib
+import zlib,queue
+import urllib.request
 
 #audio のクラス
 class Audio():
@@ -1058,6 +1059,270 @@ class dataDialog(simpledialog.Dialog):
                 break
         box.pack()
 
+script_dir = os.path.dirname(sys.argv[0])
+youtube_dlurl = "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe"
+save_path = os.path.join(os.path.dirname(sys.argv[0]),"bin\\yt-dlp.exe")
+if os.path.exists(save_path):
+    pass
+else:
+    data = urllib.request.urlopen(youtube_dlurl).read()
+    with open(save_path, mode="wb") as file:
+        file.write(data)
+try:
+    os.mkdir(os.path.join(os.path.dirname(sys.argv[0]),"tempfile"))
+except:
+    pass
+
+class popenr:
+    def __init__(self):
+        self.popenobj = ""
+        self.qudata = queue.Queue()
+        self.readth = ""
+        self.endset = False
+    def runcmd(self,command):
+        self.endset = False
+        self.readth = threading.Thread(target=self.rstdout,args=(command,))
+        self.readth.setDaemon(True)
+        self.readth.start()
+    def rstdout(self,command):
+        try:
+            startupinfo = subprocess.STARTUPINFO()
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+            self.popenobj = subprocess.Popen(command,startupinfo=startupinfo,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,stdin=subprocess.DEVNULL,shell=True)
+            while True:
+                try:
+                    line = self.popenobj.stdout.readline()
+                    if line:
+                        self.qudata.put(line)
+
+                    if not line and self.popenobj.poll() is not None:
+                        break
+                except:
+                    import traceback
+                    traceback.print_exc()
+                    break
+        except:
+            import traceback
+            traceback.print_exc()
+        self.endset = True
+    def killp(self):
+        try:
+            if self.endset:
+                try:
+                    self.popenobj.kill()
+                except:
+                    pass
+            else:
+                startupinfo = subprocess.STARTUPINFO()
+                startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+                subprocess.run(["taskkill","/f","/t","/pid",str(self.popenobj.pid)],startupinfo=startupinfo,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,stdin=subprocess.DEVNULL)
+            self.readth.join()
+        except:
+            import traceback
+            traceback.print_exc()
+        return self.qudata
+
+
+#初期設定
+runobj = popenr()
+savedir = tk.StringVar(root)
+
+openset = tk.BooleanVar(root)
+openset.set(False)
+playfileset = tk.BooleanVar(root)
+playfileset.set(True)
+
+#関数関連
+def checkmain():
+    checkbtn.config(state="disabled")
+    try:
+        for i in formattree.get_children():
+            formattree.delete(i)
+        url = urlentry.get()
+        with youtube_dl.YoutubeDL({"quiet":True}) as ydl:
+            info_dict = ydl.extract_info(url,download=False)
+            titlelbl["text"] = info_dict.get('title',"None")
+            for format in info_dict["formats"]:
+                id = format['format_id']
+                kaizoudo = ""
+                if format["format_note"] == "tiny":
+                    formattype = "音声"
+                    kaizoudo = "None"
+                else:
+                    formattype = "動画"
+                    kaizoudo = format.get("format_note","None")
+                filesize = format.get("filesize","None")
+                extdata = format.get("ext","None")
+                formattree.insert("", "end", values=(id,formattype,kaizoudo,filesize,extdata))
+                formattree.update()
+    except:
+        pass
+    checkbtn.config(state="normal")
+def check():
+    checkth = threading.Thread(target=checkmain)
+    checkth.setDaemon(True)
+    checkth.start()
+def closewin():
+    global runobj
+    try:
+        runobj.killp()
+    except:
+        pass
+    downloadwin.withdraw()
+
+def closeadd():
+    global runobj
+    try:
+        runobj.killp()
+    except:
+        pass
+    root.deiconify()
+    addwin.withdraw()
+    downloadwin.withdraw()
+
+def downloadmain():
+    global runobj
+    dlbtn["state"] = tk.DISABLED
+    try:
+        nowpath = os.getcwd()
+        try:
+            os.makedirs(savedir.get())
+        except:
+            pass
+
+        downloadwin.deiconify()
+        selected_items = formattree.selection()
+        if not selected_items:
+            messagebox.showerror("エラー","ダウンロードフォーマットを選択してください")
+            raise ValueError("no selection")
+        # SelectModeがBrowseなので、複数選択を考慮しない
+        values = formattree.item(selected_items[0])['values']
+        
+        url = urlentry.get()
+        filename = ""
+        videoformat = str(values[0])
+        audioformat = "bestaudio/best"
+        exepath = os.path.join(os.path.dirname(sys.argv[0]),"bin\\yt-dlp.exe")
+        with youtube_dl.YoutubeDL({"quiet":True}) as ydl:
+            info_dict = ydl.extract_info(url,download=False)
+            video_url = info_dict.get("url", None)
+            video_title = info_dict.get('title', None)
+        nowpath = os.getcwd()
+        os.chdir(savedir.get())
+        if video_url == None:
+            video_url = url
+        if values[1] == "動画":
+            audioformat = "bestaudio/best"
+            formattype = "mp4"
+            outpath = repr("{}.{}".format(video_title,formattype)).replace("\\","/").replace("/","_").replace(" ","_").replace("'","")
+            runobj.runcmd(f'{exepath} --newline -f {videoformat}+{audioformat} {video_url} --merge-output-format {formattype} -o {outpath}')
+        elif values[1] == "音声":
+            audioformat = str(values[0])
+            formattype = "mp3"
+            outpath = repr("{}.{}".format(video_title,formattype)).replace("\\","/").replace("/","_").replace(" ","_").replace("'","")
+            runobj.runcmd(f'{exepath} --newline -f {audioformat} {video_url} -x --audio-format {formattype} -o {outpath}')
+        resultlist.delete(0,tk.END)
+        playfilepath = os.path.abspath(outpath)
+        while not runobj.endset:
+            while not runobj.qudata.empty():
+                getdata = runobj.qudata.get()
+                try:
+                    decdata = getdata.decode("utf-8")
+                except:
+                    try:
+                        decdata = getdata.decode("cp932")
+                    except:
+                        pass
+                try:
+                    resultlist.insert(tk.END,str(decdata))
+                    resultlist.yview_moveto(1)
+                except:
+                    pass
+        audio = MP3(str(playfilepath))
+        mp3len = str(round(audio,0)) +  "秒"
+        tree.insert("", "end", values=(str(os.path.basename(playfilepath)), str(playfilepath),str(mp3len),"デフォルト"))
+        root.update()
+        fdata2.append(str(playfilepath))
+        fdata2.append(audio)
+        usejsonadd(str(playfilepath))
+            
+    except:
+        pass
+    try:
+        os.chdir(nowpath)
+    except:
+        pass
+    dlbtn["state"] = tk.NORMAL
+    root.deiconify()
+    addwin.withdraw()
+    downloadwin.withdraw()
+def download():
+    downloadth = threading.Thread(target=downloadmain)
+    downloadth.setDaemon(True)
+    downloadth.start()
+
+addwin = tk.Toplevel(root)
+addwin.attributes("-topmost",True)
+addwin.title("URLから追加")
+addwin.geometry("700x500")
+addwin.withdraw()
+addwin.protocol("WM_DELETE_WINDOW",closeadd)
+
+downloadwin = tk.Toplevel(root)
+downloadwin.attributes("-topmost",True)
+downloadwin.title("ダウンロード中...")
+downloadwin.geometry("500x300")
+downloadwin.withdraw()
+downloadwin.protocol("WM_DELETE_WINDOW",closewin)
+
+resultlist = tk.Listbox(downloadwin)
+resultlist.pack(fill=tk.BOTH,expand=True)
+
+#初期設定
+fileslist = []
+
+#動画ダウンローダー
+dlframe = tk.Frame(addwin)
+dlframe.pack(fill=tk.BOTH,expand=True)
+
+urlentry = tk.Entry(dlframe,font=("",20))
+urlentry.pack(fill=tk.X)
+
+checkbtn = ttk.Button(dlframe,text="利用可能なフォーマットを調べる",command=check)
+checkbtn.pack(fill=tk.X)
+
+titlelbl = tk.Label(dlframe,text="動画のタイトル",font=("",15))
+titlelbl.pack(fill=tk.X)
+
+treeframe = tk.Frame(dlframe)
+treeframe.pack(fill=tk.BOTH,expand=True)
+
+formattree = ttk.Treeview(treeframe)
+formattree.pack(fill=tk.BOTH,expand=True,side=tk.LEFT)
+
+scroll = tk.Scrollbar(treeframe,orient=tk.VERTICAL)
+scroll.pack(fill=tk.Y,side=tk.LEFT)
+
+scroll.config(command=formattree.yview)
+formattree.config(yscrollcommand=scroll.set)
+
+formattree["columns"] = (1,2,3,2+2,5)
+# ヘッダーの設定
+formattree["show"] = "headings"
+formattree.heading(1,text="id")
+formattree.heading(2,text="タイプ")
+formattree.heading(3,text="画質")
+formattree.heading(2+2,text="サイズ")
+formattree.heading(5,text="拡張子")
+# 各列の幅設定
+formattree.column(1,width=50)
+formattree.column(2,width=100)
+formattree.column(3,width=100)
+formattree.column(2+2,width=100)
+formattree.column(5,width=100)
+
+dlbtn = ttk.Button(dlframe,text="URLから追加",command=download)
+dlbtn.pack(fill=tk.X)
 browserrunset = tk.BooleanVar(root)
 browserrunset.set(True)
 browserendset = tk.BooleanVar(root)
@@ -1069,16 +1334,6 @@ moviewindow = tk.Toplevel()
 moviewindow.attributes("-topmost",True)
 moviewindow.geometry("500x300")
 moviewindow.update_idletasks()
-progressdialog = tk.Toplevel(root)
-progressdialog.resizable(0,0)
-progressdialog.title("ファイルを取得しています...")
-progressdialog.attributes("-topmost",True)
-dllbl = tk.Label(progressdialog,text="現在の進捗:" + str("0") + "%",font=("",20))
-dllbl.pack(fill=tk.BOTH,expand=True)
-dlprogress = ttk.Progressbar(progressdialog)
-dlprogress.pack(fill=tk.BOTH,expand=True)
-progressdialog.protocol('WM_DELETE_WINDOW', (lambda: 'pass')())
-progressdialog.withdraw()
 
 video.sizechange(int(moviewindow.winfo_width()+5),int(moviewindow.winfo_height()+5))
 movielabel = tk.Label(moviewindow)
@@ -1095,15 +1350,8 @@ def showPopup(event):
 videoboolset = tk.BooleanVar()
 videoboolset.set(True)
 def urlread():
-    root.attributes("-topmost",False)
-    inputdata = simpledialog.askstring("URLBox", "YoutubeのURLを入力してください(長すぎる動画は避けてください)",)
-    if inputdata == None:
-        pass
-    else:
-        dlth = threading.Thread(target=youtubeadd,args=(inputdata,))
-        dlth.setDaemon(True)
-        dlth.start()
-    root.attributes("-topmost",True)
+    root.withdraw()
+    addwin.deiconify()
 def videoset():
     if videoboolset.get():
         moviewindow.withdraw()
@@ -1570,56 +1818,9 @@ def makename(dirpath,extension):
         else:
             break
     return fpath
-def youtubeadd(url):
-    urlbtn.config(state="disabled")
-    root.title("ファイルを取得しています")
-    root.update()
-    try:
-        os.mkdir("tempfile\\ytdl-temp")
-    except:
-        pass
-    outpath = makename(mypath + '\\tempfile\\ytdl-temp',".mp4")
-    dlprogress.config(maximum=int(100))
-    progressdialog.update()
-    progressdialog.deiconify()
-    try:
-        def progress_hook(debug):
-            if debug['status'] == 'finished':
-                progressdialog.withdraw()
-            else:
-                try:
-                    dllbl.config(text="現在の進捗:" + str(float(str(debug["_percent_str"]).replace("%",""))) + "%")
-                    dlprogress.config(value=float(str(debug["_percent_str"]).replace("%","")))
-                    progressdialog.update()
-                    
-                except:
-                    pass
-        ydl_opts = {
-            'format': 'mp4',
-            'progress_hooks': [progress_hook],
-            "outtmpl": outpath,
-            'logger': DlLogger(),
-            'video':"bestvideo/best",
-            "audio":"bestaudio/best",
-        }
-        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-            ydl.download([url])
-        data = outpath
-        audio = MP3(str(data))
-        mp3len = str(round(audio,0)) +  "秒"
-        tree.insert("", "end", values=(str(os.path.basename(data)), str(data),str(mp3len),"デフォルト"))
-        fdata2.append(str(data))
-        fdata2.append(audio)
-        usejsonadd(str(data))
-    except:
-        progressdialog.withdraw()
-        import traceback
-        traceback.print_exc()
-        messagebox.showerror("エラー","エラーが発生しました")
-        urlbtn.config(state="normal")
-    root.title("音楽プレイヤー")
-    urlbtn.config(state="normal")
+
 temppath = mypath + "\\tempfile\\ytdl-temp"
+savedir.set(temppath)
 try:
     os.mkdir(temppath)
 except:
