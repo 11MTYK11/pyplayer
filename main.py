@@ -1246,7 +1246,6 @@ def downloadmain():
         root.update()
         fdata2.append(str(playfilepath))
         fdata2.append(audio)
-        usejsonadd(str(playfilepath))
             
     except:
         pass
