@@ -8,6 +8,7 @@
 
 # 説明
 tkinterで作ったメディアプレイヤーです
+**自己責任で使用してください**
 ## 注意
 [セットアップファイル](https://github.com/MT-YK/pyplayer/releases/download/1.0/pyplayer_setup.exe)はwindows defenderに誤検出されます
 セットアップファイルは安全です
