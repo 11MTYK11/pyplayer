@@ -86,7 +86,7 @@ class Audio():
             audiopath = self.title
             stream = ffmpeg.input(videopath)
             stream = ffmpeg.output(stream, audiopath,format="mp3")
-            ffmpeg.run(stream)
+            ffmpeg.run(stream,cmd=os.path.join(os.path.dirname(sys.argv[0]),"bin\\ffmpeg.exe"))
         except:
             pass
         try:
