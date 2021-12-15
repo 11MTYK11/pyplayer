@@ -6,7 +6,7 @@ import glob
 import site
 import subprocess
 
-filepath = "main.py"
+filepath = "pyplayer.py"
 version = "1.0"
 
 basepath = site.getsitepackages()[1] + r"\ffmpeg"
