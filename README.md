@@ -8,9 +8,10 @@
 
 # 説明
 tkinterで作ったメディアプレイヤーです
-**自己責任で使用してください**
+# 使用時の注意
+![enter image description here](https://github.com/MT-YK/pyplayer/raw/main/gui_%E8%AA%AC%E6%98%8E.png)
 ## 注意
-[セットアップファイル(V1.0)](https://github.com/MT-YK/pyplayer/releases/download/1.0/pyplayer_setup.exe)はwindows defenderに誤検出されます
+[セットアップファイルV1.0](https://github.com/MT-YK/pyplayer/releases/download/1.0/pyplayer_setup.exe)はwindows defenderに誤検出されます
 セットアップファイルは安全です
 
 Virus totalの結果↓
@@ -32,3 +33,5 @@ Virus totalの結果↓
 
 
 <p><img align="left" src="https://github-readme-stats.vercel.app/api/top-langs?username=mt-yk&show_icons=true&locale=en&layout=compact" alt="mt-yk" /></p>
+
+<p>&nbsp;<img align="center" src="https://github-readme-stats.vercel.app/api?username=mt-yk&show_icons=true&locale=en" alt="mt-yk" /></p>
