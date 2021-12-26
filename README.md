@@ -9,7 +9,7 @@
 # 説明
 tkinterで作ったメディアプレイヤーです
 # 使用時の注意
-![enter image description here](https://github.com/MT-YK/pyplayer/raw/main/gui_%E8%AA%AC%E6%98%8E.png)
+![enter image description here](https://github.com/11MTYK11/pyplayer/raw/main/gui_%E8%AA%AC%E6%98%8E.png)
 ## 注意
 [セットアップファイルV1.0](https://github.com/MT-YK/pyplayer/releases/download/1.0/pyplayer_setup.exe)はwindows defenderに誤検出されます
 セットアップファイルは安全です
