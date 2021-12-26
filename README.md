@@ -15,7 +15,7 @@ tkinterで作ったメディアプレイヤーです
 セットアップファイルは安全です
 
 Virus totalの結果↓
-![Virustotalの結果](https://github.com/MT-YK/pyplayer/raw/main/virustotal.png)
+![Virustotalの結果](https://github.com/11MTYK11/pyplayer/raw/main/virustotal.png)
 
 ## 開発者向け
  1. `git clone https://github.com/MT-YK/pyplayer.git`
